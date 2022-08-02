@@ -57,10 +57,8 @@ def get_valid_recipes(attributes):
             except TypeError:
                 logging.warning('%s needs to implement all abstract methods', \
                     attribute_name)
-                pass
             except:
                 logging.warning('Unexpected error: %s', sys.exc_info()[0])
-                pass
     return recipe_objs
 
 
@@ -78,8 +76,7 @@ def get_recipes():
     attributes = [(attribute_name, getattr(recipe_module, attribute_name))
                     for recipe_module in recipe_modules
                     for attribute_name in dir(recipe_module)]
-    recipes = get_valid_recipes(attributes)
-    return recipes
+    return get_valid_recipes(attributes)
 
 def get_loadgen_ip():
     Recipe._auth_cluster('LOADGEN')
@@ -133,8 +130,7 @@ def loadgen(traffic_pattern):
     Recipe._run_command(set_env_command)
     Recipe._run_command(delete_pods_command)
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
-    ip_addr = get_loadgen_ip()
-    if ip_addr:
+    if ip_addr := get_loadgen_ip():
         print(f"Loadgenerator web UI: http://{ip_addr}")
     Recipe._auth_cluster('APP')
 
@@ -177,10 +173,10 @@ def describe():
     """Show information about an existing sandbox"""
     gcp_path = "https://console.cloud.google.com"
     project_id = get_project_id()
-    loadgen_ip = "http://" + get_loadgen_ip()
-    external_ip = "http://" + get_external_ip()
-    gcp_kubernetes_path = gcp_path + '/kubernetes/workload?project=' + project_id
-    gcp_monitoring_path = gcp_path + '/monitoring?project=' + project_id
+    loadgen_ip = f"http://{get_loadgen_ip()}"
+    external_ip = f"http://{get_external_ip()}"
+    gcp_kubernetes_path = f'{gcp_path}/kubernetes/workload?project={project_id}'
+    gcp_monitoring_path = f'{gcp_path}/monitoring?project={project_id}'
     print("""
     Cloud Operations Sandbox info for project {}:
     - Load generator web interface: {}

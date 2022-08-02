@@ -22,7 +22,7 @@ from google.cloud import monitoring_v3
 
 def getIstioServiceName(service_name, project_id, zone):
     """ Returns the Istio service name of a certain service. """
-    return "ist:{}-zone-{}-cloud-ops-sandbox-default-{}".format(project_id, zone, service_name)
+    return f"ist:{project_id}-zone-{zone}-cloud-ops-sandbox-default-{service_name}"
 
 
 def findService(client, service_name, project_id, zone, should_timeout):
@@ -76,8 +76,5 @@ if __name__ == '__main__':
         exit('Missing Project Name or Zone. Usage: python3 istio_service_setup.py $project_id $zone')
 
     # optional parameter to determine whether we should timeout, default = True
-    if len(sys.argv) == 4:
-        should_timeout = False
-    else:
-        should_timeout = True
+    should_timeout = len(sys.argv) != 4
     waitForIstioServicesDetection(project_id, zone, should_timeout)

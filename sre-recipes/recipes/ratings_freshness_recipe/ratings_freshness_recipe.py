@@ -55,7 +55,7 @@ class RatingsFreshnessRecipe(Recipe):
         _, err_str = Recipe._run_command(pause_command)
         if "ERROR:" in str(err_str, "utf-8"):
             print(err_str)
-            logging.error("Failed executing service breaking command:" + err_str)
+            logging.error(f"Failed executing service breaking command:{err_str}")
         else:
             print("...done")
             logging.info("Scheduled job of the rating service paused")
@@ -78,7 +78,7 @@ class RatingsFreshnessRecipe(Recipe):
         _, err_str = Recipe._run_command(resume_command)
         if "ERROR:" in str(err_str, "utf-8"):
             print(err_str)
-            logging.error("Failed executing service restoring command:" + err_str)
+            logging.error(f"Failed executing service restoring command:{err_str}")
         else:
             print("...done")
             logging.info("Scheduled job of the rating service resumed")

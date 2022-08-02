@@ -29,14 +29,13 @@ from google.cloud import pubsub_v1
 def obfuscate_project_id(project_id):
     m = hashlib.sha256()
     m.update(project_id.encode('utf-8'))
-    hashed = m.hexdigest()
-    return hashed
+    return m.hexdigest()
 
 # formats JSON object and re-forms project argument
 def get_telemetry_msg(session, project_id, event, version):
     datetime=time.time() # Unix timestamp
     project=obfuscate_project_id(project_id)
-    
+
     # send in json format
     data = {
         "session": session,
@@ -45,8 +44,7 @@ def get_telemetry_msg(session, project_id, event, version):
         "datetime": datetime,
         "version": version
     }
-    msg = json.dumps(data)
-    return msg
+    return json.dumps(data)
 
 # returns True if arguments are valid (correct format and type)
 # returns False along with an error message if not
@@ -56,17 +54,20 @@ def validate_args(session, project_id, event, version):
         "project_id": r"^cloud-ops-sandbox-(\d){6,12}$",
         "v4uuid": r"^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}$"
     }
-    
+
     # check types
     if (not isinstance(event, str) or not isinstance(version, str) or
         not isinstance(project_id, str) or not isinstance(session, str)):
         return False, "An argument passed to telemetry was an invalid type."
-    
+
     # check format
-    if (re.fullmatch(args_exp["version"], version) is None): return False, ("Version argument " + version + " was an invalid format.")
-    if (re.fullmatch(args_exp["project_id"], project_id) is None): return False, ("Project id argument " + project_id + " was an invalid format.")
-    if (re.fullmatch(args_exp["v4uuid"], session) is None): return False, ("Session argument " + session + " was an invalid format.")
-    
+    if (re.fullmatch(args_exp["version"], version) is None):
+        return False, f"Version argument {version} was an invalid format."
+    if (re.fullmatch(args_exp["project_id"], project_id) is None):
+        return False, f"Project id argument {project_id} was an invalid format."
+    if (re.fullmatch(args_exp["v4uuid"], session) is None):
+        return False, f"Session argument {session} was an invalid format."
+
     return True, ""
 
 # IF TESTING THIS FUNCTION, USE TOPIC ID = "telemetry"
@@ -83,17 +84,17 @@ def send_telemetry_message(session, project_id, event, version):
         print("Failed to send telemetry.")
         print(err_msg)
         return
-    
+
     # send data as a bytestring
     msg = get_telemetry_msg(session, project_id, event, version)
     bytes = msg.encode("utf-8")
-    
+
     # connect to pubsub and send message
     project_id = "stackdriver-sandbox-230822"
     topic_id = "telemetry_test"
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_id)
-    
+
     publisher.publish(topic_path, data=bytes)
 
 if __name__ == "__main__":

@@ -54,7 +54,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
-        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+        logger.info(f"[Recv ListRecommendations] product_ids={prod_list}")
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
@@ -90,17 +90,15 @@ if __name__ == "__main__":
     except (Exception, err):
         logger.error("could not enable debugger")
         logger.error(traceback.print_exc())
-        pass
-
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
     if catalog_addr == "":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
-    logger.info("product catalog address: " + catalog_addr)
+    logger.info(f"product catalog address: {catalog_addr}")
 
     # Create the gRPC client channel to ProductCatalog (server).
     channel = grpc.insecure_channel(catalog_addr)
-    
+
     # OpenTelemetry client interceptor passes trace contexts to the server.
     channel = intercept_channel(channel, client_interceptor(trace.get_tracer_provider()))
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
@@ -116,8 +114,8 @@ if __name__ == "__main__":
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
     # start server
-    logger.info("listening on port: " + port)
-    server.add_insecure_port('[::]:'+port)
+    logger.info(f"listening on port: {port}")
+    server.add_insecure_port(f'[::]:{port}')
     server.start()
 
     # keep alive

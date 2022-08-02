@@ -35,19 +35,18 @@ logger = getJSONLogger('recommendationservice-server')
 
 if __name__ == "__main__":
     # get port
-    if len(sys.argv) > 1:
-        port = sys.argv[1]
-    else:
-        port = "8080"
-
+    port = sys.argv[1] if len(sys.argv) > 1 else "8080"
     # TODO: remove OpenCensus after conversion to OpenTelemetry
     try:
         exporter = stackdriver_exporter.StackdriverExporter()
         tracer = Tracer(exporter=exporter)
-        oc_interceptor = oc_client_interceptor.OpenCensusClientInterceptor(tracer, host_port='localhost:'+port)
+        oc_interceptor = oc_client_interceptor.OpenCensusClientInterceptor(
+            tracer, host_port=f'localhost:{port}'
+        )
+
     except:
         oc_interceptor = oc_client_interceptor.OpenCensusClientInterceptor()
-    
+
     # OpenTelemetry Tracing
     trace.set_tracer_provider(TracerProvider())
 
@@ -57,7 +56,7 @@ if __name__ == "__main__":
     )
 
     # set up server stub
-    channel = grpc.insecure_channel('localhost:'+port)
+    channel = grpc.insecure_channel(f'localhost:{port}')
     channel = intercept_channel(channel, client_interceptor(trace.get_tracer_provider()))
     stub = demo_pb2_grpc.RecommendationServiceStub(channel)
     # form request

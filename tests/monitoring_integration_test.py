@@ -95,10 +95,7 @@ class TestUptimeCheck(unittest.TestCase):
         """" Test that ensures there is only one uptime check created """
         client = monitoring_v3.UptimeCheckServiceClient()
         configs = client.list_uptime_check_configs(project_name)
-        config_list = []
-        for config in configs:
-            config_list.append(config)
-
+        config_list = list(configs)
         self.assertEqual(len(config_list), 1)
 
     def testUptimeCheckName(self):
@@ -118,10 +115,10 @@ class TestUptimeCheck(unittest.TestCase):
         """ Test that an alerting policy was created. """
         client = monitoring_v3.AlertPolicyServiceClient()
         policies = client.list_alert_policies(project_name)
-        found_uptime_alert = False
-        for policy in policies:
-            if policy.display_name == 'HTTP Uptime Check Alerting Policy':
-                found_uptime_alert = True
+        found_uptime_alert = any(
+            policy.display_name == 'HTTP Uptime Check Alerting Policy'
+            for policy in policies
+        )
 
         self.assertTrue(found_uptime_alert)
 
@@ -129,10 +126,7 @@ class TestUptimeCheck(unittest.TestCase):
         """ Test that our single notification channel was created. """
         client = monitoring_v3.NotificationChannelServiceClient()
         channels = client.list_notification_channels(project_name)
-        channel_list = []
-        for channel in channels:
-            channel_list.append(channel)
-
+        channel_list = list(channels)
         self.assertEqual(len(channel_list), 1)
 
 
@@ -140,10 +134,10 @@ class TestMonitoringDashboard(unittest.TestCase):
     def checkForDashboard(self, dashboard_display_name):
         client = v1.DashboardsServiceClient()
         dashboards = client.list_dashboards(project_name)
-        for dashboard in dashboards:
-            if dashboard.display_name == dashboard_display_name:
-                return True
-        return False
+        return any(
+            dashboard.display_name == dashboard_display_name
+            for dashboard in dashboards
+        )
 
     def testUserExpDashboard(self):
         """ Test that the User Experience Dashboard gets created. """
@@ -278,7 +272,7 @@ class TestServiceSlo(unittest.TestCase):
         return self.client.get_service_level_objective(name)
 
     def getIstioService(self, service_name):
-        return 'ist:' + project_id + '-zone-' + zone + '-cloud-ops-sandbox-default-' + service_name
+        return f'ist:{project_id}-zone-{zone}-cloud-ops-sandbox-default-{service_name}'
 
     def testFrontendServiceSloExists(self):
         """ Test that for Frontend Service that two SLOs (availability, latency) get created. """
@@ -374,7 +368,7 @@ class TestServiceSlo(unittest.TestCase):
 
     def testRatingServiceSloExists(self):
         """ Test the rating service for having two SLOs (availability, latency) get created. """
-        service_id = 'gae:' + project_id + '_ratingservice'
+        service_id = f'gae:{project_id}_ratingservice'
         found_availability_slo = self.checkForSlo(
             service_id, 'availability-slo')
         self.assertTrue(found_availability_slo)
@@ -388,10 +382,7 @@ class TestSloAlertPolicy(unittest.TestCase):
 
     def checkForAlertingPolicy(self, policy_display_name):
         policies = self.client.list_alert_policies(project_name)
-        for policy in policies:
-            if policy.display_name == policy_display_name:
-                return True
-        return False
+        return any(policy.display_name == policy_display_name for policy in policies)
 
     def testFrontendServiceSloAlertExists(self):
         """ Test that the Alerting Policies for the Frontend Service SLO get created. """

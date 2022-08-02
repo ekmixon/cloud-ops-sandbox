@@ -73,7 +73,7 @@ class Recipe(abc.ABC):
         project_id, error = Recipe._run_command(get_project_command)
         project_id = project_id.decode("utf-8").replace('"', "").strip()
         if not project_id:
-            logging.error("Could not retrieve project id: " + error)
+            logging.error(f"Could not retrieve project id: {error}")
         return project_id
     
     @staticmethod
@@ -82,7 +82,7 @@ class Recipe(abc.ABC):
         external_ip_command = "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
         ip, error = Recipe._run_command(external_ip_command)
         if not ip:
-            logging.error('No external IP found:' + error)
+            logging.error(f'No external IP found:{error}')
         return ip.decode("utf-8").replace("'", '')
 
     @staticmethod
@@ -94,25 +94,20 @@ class Recipe(abc.ABC):
             print("No project found.")
             logging.error("Could not authenticate cluster. No project ID found.")
             exit(1)
-        name = "cloud-ops-sandbox"
-        if cluster == "LOADGEN":
-            name = "loadgenerator"
-        zone_command = "gcloud container clusters list --filter name:{} --project {} --format value(zone)".format(
-            name, project_id
-        )
+        name = "loadgenerator" if cluster == "LOADGEN" else "cloud-ops-sandbox"
+        zone_command = f"gcloud container clusters list --filter name:{name} --project {project_id} --format value(zone)"
+
         zone, error = Recipe._run_command(zone_command)
         zone = zone.decode("utf-8").replace('"', "")
         if not zone:
-            print("Failed to set up recipe. No cluster for {} was found.".format(name))
+            print(f"Failed to set up recipe. No cluster for {name} was found.")
             logging.error(
-                "Could not authenticate cluster. No cluster found for {} found.".format(
-                    name
-                )
+                f"Could not authenticate cluster. No cluster found for {name} found."
             )
+
             exit(1)
-        auth_command = "gcloud container clusters get-credentials {} --project {} --zone {}".format(
-            name, project_id, zone
-        )
+        auth_command = f"gcloud container clusters get-credentials {name} --project {project_id} --zone {zone}"
+
         Recipe._run_command(auth_command)
         logging.info("Cluster has been authenticated")
 
@@ -127,18 +122,17 @@ class Recipe(abc.ABC):
             No output
         """
         # Verify the correct exists as a choice
-        if not correct_answer in choices:
+        if correct_answer not in choices:
             logging.error(
-                "Correct answer not found in available choices for prompt: {}".format(
-                    prompt
-                )
+                f"Correct answer not found in available choices for prompt: {prompt}"
             )
+
             return
 
         # Show the multiple choice
         print(prompt)
         for index, choice in enumerate(choices, 1):
-            print("\t {}) {}".format(index, choice))
+            print(f"\t {index}) {choice}")
 
         # Verify the answer
         while True:

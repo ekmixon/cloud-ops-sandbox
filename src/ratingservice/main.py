@@ -39,12 +39,12 @@ if not all([db_name, db_user, db_pass, db_host]):
     print('error: environment vars DB_USERNAME, DB_PASSWORD, DB_NAME and DB_HOST must be defined.')
     exit(1)
 if os.environ.get('GAE_ENV') == 'standard':
-    db_host = '/cloudsql/{}'.format(db_host)
+    db_host = f'/cloudsql/{db_host}'
 
 
 def getConnection():
     global db_connection_pool
-    if db_connection_pool == None:
+    if db_connection_pool is None:
         cfg = {
             'user': db_user,
             'password': db_pass,
@@ -55,7 +55,7 @@ def getConnection():
         try:
             db_connection_pool = pool.SimpleConnectionPool(
                 minconn=1, maxconn=max_connections, **cfg)
-        except (Exception, DatabaseError) as error:
+        except Exception as error:
             print(error)
             return None
     return db_connection_pool.getconn()
@@ -96,22 +96,21 @@ def getRatings():
     '''
 
     conn = getConnection()
-    if conn == None:
+    if conn is None:
         return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
             cursor.execute("SELECT eid, ROUND(rating,4) FROM ratings")
             result = cursor.fetchall()
         conn.commit()
-        if result is not None:
-            # cast to float because flask.jsonify doesn't work with decimal
-            ratings = [{"id": eid.strip(), "rating": float(rating)}
-                       for (eid, rating) in result]
-            return makeResult({
-                'ratings': ratings,
-            })
-        else:
+        if result is None:
             return makeError(500, 'No available ratings')
+        # cast to float because flask.jsonify doesn't work with decimal
+        ratings = [{"id": eid.strip(), "rating": float(rating)}
+                   for (eid, rating) in result]
+        return makeResult({
+            'ratings': ratings,
+        })
     except DatabaseError:
         return makeError(500, 'DB error')
     finally:
@@ -135,7 +134,7 @@ def getRatingById(eid):
     if not eid:
         return makeError(400, "malformed entity id")
     conn = getConnection()
-    if conn == None:
+    if conn is None:
         return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
@@ -174,7 +173,7 @@ def postRating():
     '''
 
     data = request.get_json()
-    if data == None:
+    if data is None:
         return makeError(400, "missing json payload")
     eid = data.get('id')
     if not eid:
@@ -190,7 +189,7 @@ def postRating():
         return makeError(400, "rating should be value between 1 and 5")
 
     conn = getConnection()
-    if conn == None:
+    if conn is None:
         return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
@@ -215,7 +214,7 @@ def aggregateRatings():
         HTTP status 500 when there is an error querying DB
     '''
     conn = getConnection()
-    if conn == None:
+    if conn is None:
         return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:

@@ -69,7 +69,6 @@ class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
 class EmailService(BaseEmailService):
   def __init__(self):
     raise Exception('cloud mail client not implemented')
-    super().__init__()
 
   @staticmethod
   def send_email(client, email_address, content):
@@ -89,7 +88,7 @@ class EmailService(BaseEmailService):
         "html_body": content
       }
     )
-    logger.info("Message sent: {}".format(response.rfc822_message_id))
+    logger.info(f"Message sent: {response.rfc822_message_id}")
 
   def SendOrderConfirmation(self, request, context):
     email = request.email
@@ -115,7 +114,9 @@ class EmailService(BaseEmailService):
 
 class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
-    logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
+    logger.info(
+        f'A request to send order confirmation email to {request.email} has been received.'
+    )
     if os.getenv('ENCODE_EMAIL', 'false').lower() == 'true':
       try:
         encoded_email = self.EncodeEmail(request.email)
@@ -158,8 +159,8 @@ def start(dummy_mode):
   health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
   port = os.environ.get('PORT', "8080")
-  logger.info("listening on port: "+port)
-  server.add_insecure_port('[::]:'+port)
+  logger.info(f"listening on port: {port}")
+  server.add_insecure_port(f'[::]:{port}')
   server.start()
   try:
     while True:
@@ -183,8 +184,8 @@ def initStackdriverProfiling():
         googlecloudprofiler.start(service='email_server', service_version='1.0.0', verbose=0)
       logger.info("Successfully started Stackdriver Profiler.")
       return
-    except (BaseException) as exc:
-      logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
+    except BaseException as exc:
+      logger.info(f"Unable to start Stackdriver Profiler Python agent. {str(exc)}")
       if (retry < 4):
         logger.info("Sleeping %d to retry initializing Stackdriver Profiler"%(retry*10))
         time.sleep (1)
@@ -200,9 +201,8 @@ if __name__ == '__main__':
   try:
     if "DISABLE_PROFILER" in os.environ:
       raise KeyError()
-    else:
-      logger.info("Profiler enabled.")
-      initStackdriverProfiling()
+    logger.info("Profiler enabled.")
+    initStackdriverProfiling()
   except KeyError:
       logger.info("Profiler disabled.")
 

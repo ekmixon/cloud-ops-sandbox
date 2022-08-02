@@ -57,7 +57,8 @@ class TestGKECluster(unittest.TestCase):
 
     def testStatusOfServices(self):
         """ Test if all the service deployments are ready """
-        command = ("kubectl get deployment --context=%s --all-namespaces -o json" % TestGKECluster.context)
+        command = f"kubectl get deployment --context={TestGKECluster.context} --all-namespaces -o json"
+
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         services = json.loads(result.stdout)
         for service in services['items']:

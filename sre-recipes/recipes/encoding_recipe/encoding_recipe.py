@@ -95,7 +95,9 @@ class EncodingRecipe(Recipe):
             print('No project ID found.')
             logging.error('No project ID found.')
             exit(1)
-        print('Use Cloud Logging to view logs exported by each service: https://console.cloud.google.com/logs?project={}'.format(project_id))
+        print(
+            f'Use Cloud Logging to view logs exported by each service: https://console.cloud.google.com/logs?project={project_id}'
+        )
 
     def verify_broken_service(self):
         """

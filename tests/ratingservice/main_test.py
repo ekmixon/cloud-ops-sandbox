@@ -28,10 +28,11 @@ class TestEndpoints(unittest.TestCase):
 
     @classmethod
     def composeUrl(cls, resource, eid=""):
-        if not eid:
-            return "{0}/{1}".format(cls.service_url, resource)
-        else:
-            return "{0}/{1}/{2}".format(cls.service_url, resource, eid)
+        return (
+            "{0}/{1}/{2}".format(cls.service_url, resource, eid)
+            if eid
+            else "{0}/{1}".format(cls.service_url, resource)
+        )
 
     @classmethod
     def setUpClass(cls):
@@ -48,8 +49,7 @@ class TestEndpoints(unittest.TestCase):
         try:
             with open(path) as f:
                 data = json.load(f)
-                for product in data['products']:
-                    cls.products.append(product['id'])
+                cls.products.extend(product['id'] for product in data['products'])
         except:
             print("failed to load product ids from ", path)
             cls.products = []
@@ -71,8 +71,7 @@ class TestEndpoints(unittest.TestCase):
         headers = {'Accept': 'application/json',
                    'Accept-Encoding': '', 'User-Agent': None}
         lastError = None
-        retries = 3
-        while retries > 0:
+        for _ in range(3, 0, -1):
             try:
                 if method == "GET":
                     kwargs.setdefault('allow_redirects', True)
@@ -80,7 +79,6 @@ class TestEndpoints(unittest.TestCase):
             except (RequestException, ReadTimeoutError) as err:
                 lastError = err
                 time.sleep(1)
-            retries -= 1
         raise lastError
 
     def testGetAllRatings(self):
@@ -148,7 +146,7 @@ class TestEndpoints(unittest.TestCase):
         new_rating = decimal.Decimal(data['rating'])
         self.assertEqual(new_vote, prev_vote + 1)
         expected_rating = prev_rating + \
-            ((new_rating_vote-prev_rating)/(prev_vote+1))
+                ((new_rating_vote-prev_rating)/(prev_vote+1))
         # compare expected result rounded to 4 decimal places
         QUANTIZE_VALUE = decimal.Decimal("0.0001")
         self.assertEqual(new_rating.quantize(QUANTIZE_VALUE),
