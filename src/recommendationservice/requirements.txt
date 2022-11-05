@@ -26,7 +26,7 @@ opentelemetry-instrumentation-grpc==0.17b0  # via -r requirements.in
 opentelemetry-instrumentation==0.17b0  # via -r requirements.in
 opentelemetry-sdk==0.17b0  # via -r requirements.in, opentelemetry-exporter-google-cloud, opentelemetry-instrumentation-grpc
 packaging==20.9           # via google-api-core
-protobuf==3.13.0          # via google-api-core, googleapis-common-protos, grpcio-health-checking
+protobuf==3.18.3          # via google-api-core, googleapis-common-protos, grpcio-health-checking
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
 pyparsing==2.4.7          # via httplib2, packaging
