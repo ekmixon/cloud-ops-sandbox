@@ -23,7 +23,7 @@ idna==2.10                # via requests
 opentelemetry-api==0.17b0  # via -r requirements.in, opentelemetry-exporter-google-cloud, opentelemetry-instrumentation, opentelemetry-instrumentation-grpc, opentelemetry-sdk
 opentelemetry-exporter-google-cloud==0.17b0  # via -r requirements.in
 opentelemetry-instrumentation-grpc==0.17b0  # via -r requirements.in
-opentelemetry-instrumentation==0.17b0  # via -r requirements.in
+opentelemetry-instrumentation==0.41b0  # via -r requirements.in
 opentelemetry-sdk==0.17b0  # via -r requirements.in, opentelemetry-exporter-google-cloud, opentelemetry-instrumentation-grpc
 packaging==20.9           # via google-api-core
 protobuf==3.13.0          # via google-api-core, googleapis-common-protos, grpcio-health-checking
