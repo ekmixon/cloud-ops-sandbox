@@ -44,7 +44,7 @@ psutil==5.7.2
     # via locust
 pyzmq==19.0.2
     # via locust
-requests==2.24.0
+requests==2.32.0
     # via locust
 six==1.15.0
     # via geventhttpclient
