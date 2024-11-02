@@ -20,7 +20,7 @@ flask==1.1.2
     # via
     #   flask-basicauth
     #   locust
-gevent==20.12.1
+gevent==24.10.1
     # via
     #   geventhttpclient
     #   locust
@@ -50,7 +50,7 @@ six==1.15.0
     # via geventhttpclient
 urllib3==1.25.10
     # via requests
-werkzeug==1.0.1
+werkzeug==3.0.6
     # via
     #   flask
     #   locust
